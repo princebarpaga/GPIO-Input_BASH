@@ -1,2 +1,2 @@
-# GPIO-Input_BASH
-EECS 2031 - Lab 09
+# lab09
+Lab #9 GPIO pin input using BASH
