@@ -1,57 +1,33 @@
 #!/bin/bash
-#Pin 0 RED 1 GREEN 2 YELLOW 3 BLUE
 
+# 0 RED, 1 BLUE, 2 YELLOW, 3 GREEN, 4 BUZZER, 5 BUTTON
 
-gpio mode 5 in #Sets pin 5 (button as the input)
-gpio mode 5  up # Sets pin 5 to pull up resisitor
-value=$(gpio read 5)
+countsbutton=0
+counter=0
+read=$(gpio read 5)
 
-
-#Sets the value of pin 0-4 value
-for pin  in {0..4}
-do
-  gpio mode $pin out
-done
-count=0 
-press=0
 while true
 do
+    read=$(gpio read 5)
+    if [ "$read" -eq 0 ]
+    then
+        
+        ((countsbutton++))
+	./waitForButtonPress.sh
+	((counter++))
+	echo "$counter"
+        ./setbits.sh "$countsbutton"
 
-value=$(gpio read 5)
-#./waitForButtonPress.sh
+        if [ "$countsbutton" -eq 16 ]
+        then
+            countsbutton=0
+        fi
 
-if [ $value -eq 0 ]
-then
-  sleep 0.01
-  count=$(($count+ 1))
-  ./waitForButtonPress.sh  
-  press=$(($press + 1))
-  ./setbits.sh "$count"
-  echo Number of times button is pressed : $press
-  echo Value of Pin 5: $value 
-fi
-
-if [ $count -eq 16 ]
-then
-  press=$press
-  count=0
-  gpio write 4 1
- 
-  gpio write 4 0
-fi
-if [ $press -gt 15 ]
-then
-   sleep 0.5
-   press=$(($press + 0))
-   echo Number of times Button pressed: $press
-fi 
-press=$(($press + 0))
-echo Value of Pin 5: $value 
-echo Number of times button pressed: $press
-sleep 0.5
-clear
+        if [ "$countsbutton" -eq 0 ]
+        then
+            gpio write 4 1 # buzzer beeps
+            sleep 1
+            gpio write 4 0 # buzzer stops beeping
+        fi
+    fi
 done
-
-
-
-
